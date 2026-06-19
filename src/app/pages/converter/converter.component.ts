@@ -1,4 +1,5 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -123,7 +124,8 @@ import { fmt } from '../../shared/format.util';
       @if (viewMode() === 'cards') {
         <div class="compare-grid">
           @for (row of breakdown(); track row.unit.id) {
-            <div class="compare-card" [class.compare-card--active]="row.unit.id === toId">
+            <div class="compare-card" [class.compare-card--active]="row.unit.id === toId"
+                 (click)="selectToUnit(row.unit.id)" style="cursor: pointer;">
               <span class="compare-val mono">{{ fmt(row.value) }}</span>
               <span class="compare-sym mono">{{ row.unit.symbol }}</span>
               <span class="compare-name">{{ row.unit.name }}</span>
@@ -138,7 +140,8 @@ import { fmt } from '../../shared/format.util';
           </thead>
           <tbody>
             @for (row of breakdown(); track row.unit.id) {
-              <tr [class.highlight]="row.unit.id === toId">
+              <tr [class.highlight]="row.unit.id === toId"
+                  (click)="selectToUnit(row.unit.id)" style="cursor: pointer;">
                 <td>{{ row.unit.name }} <span class="mono">({{ row.unit.symbol }})</span></td>
                 <td><span class="badge" [class]="'badge ' + row.unit.system">{{ label(row.unit.system) }}</span></td>
                 <td style="text-align: right;" class="mono">{{ fmt(row.value) }}</td>
@@ -242,6 +245,7 @@ export class ConverterComponent implements OnInit, OnDestroy {
   readonly storage = inject(StorageService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   readonly fmt = fmt;
 
   quantityId = '';
@@ -314,6 +318,28 @@ export class ConverterComponent implements OnInit, OnDestroy {
   onToChange(id: string): void {
     this.toId = id;
     this.recompute();
+  }
+
+  selectToUnit(id: string): void {
+    this.toId = id;
+    if (!this.quantity) return;
+    this.result = this.service.convert(this.quantity, this.fromId, this.toId, this.value);
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([], {
+        queryParams: { q: this.quantityId, from: this.fromId, to: this.toId, v: this.value },
+      })
+    );
+    this.location.replaceState(url);
+    if (isFinite(this.result) && isFinite(this.value)) {
+      this.storage.addHistory({
+        quantityId: this.quantityId,
+        fromId: this.fromId,
+        toId: this.toId,
+        value: this.value,
+        result: this.result,
+        ts: Date.now(),
+      });
+    }
   }
 
   swap(): void {
