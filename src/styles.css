@@ -71,7 +71,7 @@ a { color: var(--accent-text); text-decoration: none; }
 
 /* ---------------------------------------------------------------- header */
 .app-header {
-  padding: 0.85rem 1.25rem;
+  padding: 0.85rem 0;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -81,10 +81,11 @@ a { color: var(--accent-text); text-decoration: none; }
 .header-inner {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
   max-width: 920px;
   margin: 0 auto;
+  padding: 0 1.25rem;
 }
 .brand { display: flex; align-items: center; gap: 0.7rem; margin-right: auto; }
 .brand-mark {
@@ -105,12 +106,13 @@ a { color: var(--accent-text); text-decoration: none; }
 }
 .app-nav { display: flex; gap: 0.25rem; flex-wrap: wrap; }
 .app-nav a {
-  display: inline-flex; align-items: center; gap: 0.4rem;
-  padding: 0.45rem 0.8rem;
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.45rem 0.6rem;
   border-radius: 999px;
   color: var(--text-muted);
-  font-size: 0.9rem; font-weight: 500;
+  font-size: 0.875rem; font-weight: 500;
   transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 .app-nav a:hover { background: var(--surface-2); color: var(--text); }
 .app-nav a.active { background: var(--accent-soft); color: var(--accent-text); }
@@ -247,9 +249,9 @@ tbody tr:last-child td { border-bottom: none; }
 /* --------------------------------------------------------- global search */
 .global-search {
   position: relative;
-  flex: 1;
-  max-width: 180px;
-  min-width: 180px;
+  flex: 0 0 auto;
+  width: 180px;
+  align-self: flex-start;
 }
 .search-input {
   height: 36px;
@@ -259,7 +261,6 @@ tbody tr:last-child td { border-bottom: none; }
 .search-dropdown {
   position: absolute;
   top: calc(100% + 5px);
-  left: 0;
   right: 0;
   min-width: 240px;
   background: var(--surface);

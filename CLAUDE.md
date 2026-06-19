@@ -70,6 +70,11 @@ The app ships as a PWA. `main.ts` registers `@angular/service-worker` (enabled i
 
 The reference page has a session-only Favourites table (in-memory `Set` signal, not persisted) that appears above the category groups when at least one row is checked. Each unit row has a checkbox as its first column; checking it adds the row to Favourites, unchecking removes it. The Favourites table uses the same column structure and styling as the category tables.
 
+## Component conventions
+
+- All component templates must live in a separate `.html` file (`templateUrl`) — never use inline `template` strings.
+- Component, template, and style files share the same directory and base name (e.g. `foo.component.ts`, `foo.component.html`, `foo.component.css`).
+
 ## Notes
 
 - `strictTemplates` is **off** in `tsconfig.json` — turn it on when iterating in your editor.
