@@ -106,24 +106,46 @@ import { fmt } from '../../shared/format.util';
     </div>
 
     <div class="card" style="margin-top: 1.25rem;">
-      <h3>All {{ quantity?.name?.toLowerCase() }} units</h3>
-      <p style="color: var(--text-faint); font-size: 0.85rem; margin: 0 0 0.75rem;">
-        {{ fmt(value) }} {{ fromSymbol }} expressed in every unit of this quantity.
-      </p>
-      <table>
-        <thead>
-          <tr><th>Unit</th><th>System</th><th style="text-align: right;">Value</th></tr>
-        </thead>
-        <tbody>
+      <div class="compare-header">
+        <div>
+          <h3 style="margin: 0;">All {{ quantity?.name?.toLowerCase() }} units</h3>
+          <p style="color: var(--text-faint); font-size: 0.85rem; margin: 0.25rem 0 0;">
+            {{ fmt(value) }} {{ fromSymbol }} expressed in every unit of this quantity.
+          </p>
+        </div>
+        <div class="view-toggle">
+          <button class="toggle-btn" [class.active]="viewMode() === 'cards'" (click)="viewMode.set('cards')">Cards</button>
+          <button class="toggle-btn" [class.active]="viewMode() === 'table'" (click)="viewMode.set('table')">Table</button>
+        </div>
+      </div>
+
+      @if (viewMode() === 'cards') {
+        <div class="compare-grid">
           @for (row of breakdown(); track row.unit.id) {
-            <tr [class.highlight]="row.unit.id === toId">
-              <td>{{ row.unit.name }} <span class="mono">({{ row.unit.symbol }})</span></td>
-              <td><span class="badge" [class]="'badge ' + row.unit.system">{{ label(row.unit.system) }}</span></td>
-              <td style="text-align: right;" class="mono">{{ fmt(row.value) }}</td>
-            </tr>
+            <div class="compare-card" [class.compare-card--active]="row.unit.id === toId">
+              <span class="compare-val mono">{{ fmt(row.value) }}</span>
+              <span class="compare-sym mono">{{ row.unit.symbol }}</span>
+              <span class="compare-name">{{ row.unit.name }}</span>
+              <span class="badge" [class]="'badge ' + row.unit.system">{{ label(row.unit.system) }}</span>
+            </div>
           }
-        </tbody>
-      </table>
+        </div>
+      } @else {
+        <table style="margin-top: 0.75rem;">
+          <thead>
+            <tr><th>Unit</th><th>System</th><th style="text-align: right;">Value</th></tr>
+          </thead>
+          <tbody>
+            @for (row of breakdown(); track row.unit.id) {
+              <tr [class.highlight]="row.unit.id === toId">
+                <td>{{ row.unit.name }} <span class="mono">({{ row.unit.symbol }})</span></td>
+                <td><span class="badge" [class]="'badge ' + row.unit.system">{{ label(row.unit.system) }}</span></td>
+                <td style="text-align: right;" class="mono">{{ fmt(row.value) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </div>
   `,
   styles: [
@@ -161,6 +183,31 @@ import { fmt } from '../../shared/format.util';
       .formula-label { color: var(--text-faint); white-space: nowrap; }
       .formula-expr { color: var(--text); }
       tr.highlight td { background: var(--accent-soft) !important; }
+      .compare-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+      .view-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; }
+      .toggle-btn {
+        padding: 0.35rem 0.85rem; font-size: 0.82rem; font-weight: 500;
+        background: none; border: none; cursor: pointer;
+        color: var(--text-faint); transition: background 0.12s, color 0.12s;
+      }
+      .toggle-btn.active { background: var(--accent-soft); color: var(--accent-text); }
+      .compare-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+      .compare-card {
+        display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;
+        padding: 0.85rem;
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        background: var(--surface);
+      }
+      .compare-card--active { border-color: var(--accent); background: var(--accent-soft); }
+      .compare-val { font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.2; word-break: break-all; }
+      .compare-card--active .compare-val { color: var(--accent-text); }
+      .compare-sym { font-size: 0.9rem; color: var(--text-faint); }
+      .compare-name { font-size: 0.78rem; color: var(--text-faint); margin-top: 0.15rem; }
       .converter-layout {
         display: flex; gap: 1.25rem; align-items: flex-start;
       }
@@ -204,6 +251,7 @@ export class ConverterComponent implements OnInit {
   quantity?: Quantity;
   readonly copied = signal(false);
   readonly chainSteps = signal<string[]>([]);
+  readonly viewMode = signal<'cards' | 'table'>('cards');
 
   ngOnInit(): void {
     const p = this.route.snapshot.queryParamMap;
