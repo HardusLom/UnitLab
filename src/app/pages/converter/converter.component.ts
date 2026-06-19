@@ -23,14 +23,11 @@ import { fmt } from '../../shared/format.util';
         margin-top: 1.25rem;
       }
       .swap { align-self: center; margin-top: 1.6rem; }
-      .result-box {
-        height: 42px;
-        display: flex; align-items: center;
-        padding: 0 0.7rem;
-        background: var(--accent-soft); color: var(--accent-text);
-        border-radius: var(--radius-sm);
-        font-weight: 600; font-variant-numeric: tabular-nums;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      .compound-hint {
+        font-size: 0.82rem; font-weight: 600;
+        color: var(--accent-text);
+        font-variant-numeric: tabular-nums;
+        margin: 0.3rem 0 0; padding: 0;
       }
       .convert-summary {
         display: flex; align-items: center; justify-content: space-between;
@@ -131,10 +128,19 @@ export class ConverterComponent implements OnInit, OnDestroy {
   result = 0;
   quantity?: Quantity;
   readonly copied = signal(false);
+  readonly resultCopied = signal(false);
   readonly chainSteps = signal<string[]>([]);
   readonly viewMode = signal<'cards' | 'table'>('cards');
 
   private paramSub?: Subscription;
+
+  // Compound unit chains: quantity id → ordered unit-id chains (largest → smallest)
+  private readonly COMPOUND_CHAINS: Record<string, string[][]> = {
+    length: [['ft', 'in']],
+    mass:   [['st', 'lb'], ['lb', 'oz']],
+    time:   [['wk', 'd'], ['d', 'h', 'min', 's'], ['h', 'min', 's'], ['min', 's']],
+    angle:  [['deg', 'arcmin', 'arcsec']],
+  };
 
   private defaultFrom(q: Quantity): string {
     return q.units.find(u => u.factor === 1 && (u.offset ?? 0) === 0)?.id ?? q.units[0].id;
@@ -183,6 +189,12 @@ export class ConverterComponent implements OnInit, OnDestroy {
     return fmt(this.result);
   }
 
+  /** Rounded result for display in the to-input (avoids raw float noise). */
+  get displayResult(): number | '' {
+    if (!isFinite(this.result)) return '';
+    return parseFloat(this.result.toPrecision(7));
+  }
+
   onQuantityChange(id: string): void {
     const q = this.service.getQuantity(id);
     if (!q) return;
@@ -198,6 +210,28 @@ export class ConverterComponent implements OnInit, OnDestroy {
     this.value = Number(v);
     this.recompute();
   }
+
+  onToValueChange(v: number | string): void {
+    const num = +v;
+    if (!isFinite(num) || !this.quantity) return;
+    this.result = num;
+    this.value = this.service.convert(this.quantity, this.toId, this.fromId, num);
+    this.router.navigate([], {
+      queryParams: { q: this.quantityId, from: this.fromId, to: this.toId, v: this.value },
+      replaceUrl: true,
+    });
+    if (isFinite(this.value)) {
+      this.storage.addHistory({
+        quantityId: this.quantityId,
+        fromId: this.fromId,
+        toId: this.toId,
+        value: this.value,
+        result: this.result,
+        ts: Date.now(),
+      });
+    }
+  }
+
   onFromChange(id: string): void {
     this.fromId = id;
     this.recompute();
@@ -253,6 +287,49 @@ export class ConverterComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ---- Compound units -------------------------------------------------------
+
+  /** Returns a compound breakdown string (e.g. "5 ft 9 in") when the to-unit
+   *  is the first in a known compound chain and the result has a sub-unit part. */
+  compoundResult(): string | null {
+    if (!this.quantity) return null;
+    const chains = this.COMPOUND_CHAINS[this.quantityId];
+    if (!chains) return null;
+    const chain = chains.find(c => c[0] === this.toId);
+    if (!chain) return null;
+    return this.buildCompound(chain, this.result);
+  }
+
+  private buildCompound(chain: string[], value: number): string | null {
+    const q = this.quantity!;
+    const isNeg = value < 0;
+    let rem = Math.abs(value);
+    const parts: string[] = [];
+
+    for (let i = 0; i < chain.length - 1; i++) {
+      const whole = Math.floor(rem);
+      const frac = rem - whole;
+      const sym = this.service.getUnit(q, chain[i])?.symbol;
+      if (!sym) return null;
+      if (i === 0) {
+        parts.push(`${isNeg ? -whole : whole} ${sym}`);
+      } else if (whole !== 0) {
+        parts.push(`${whole} ${sym}`);
+      }
+      rem = this.service.convert(q, chain[i], chain[i + 1], frac);
+    }
+
+    const lastUnit = this.service.getUnit(q, chain[chain.length - 1]);
+    if (!lastUnit) return null;
+    const lastVal = parseFloat(rem.toPrecision(6));
+    if (lastVal !== 0) parts.push(`${lastVal} ${lastUnit.symbol}`);
+
+    // Only useful if we have at least two parts (a whole + sub-unit)
+    return parts.length >= 2 ? parts.join(' ') : null;
+  }
+
+  // ---- Copy actions ---------------------------------------------------------
+
   copyLink(): void {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
@@ -260,6 +337,17 @@ export class ConverterComponent implements OnInit, OnDestroy {
       setTimeout(() => this.copied.set(false), 2000);
     });
   }
+
+  copyResult(): void {
+    const compound = this.compoundResult();
+    const text = compound ?? `${this.formattedResult} ${this.toSymbol}`;
+    navigator.clipboard.writeText(text).then(() => {
+      this.resultCopied.set(true);
+      setTimeout(() => this.resultCopied.set(false), 2000);
+    });
+  }
+
+  // ---- Breakdown / chain ----------------------------------------------------
 
   breakdown() {
     if (!this.quantity) return [];

@@ -37,6 +37,19 @@ const DIFFICULTIES: { id: Difficulty; label: string; desc: string }[] = [
       }
       .diff-btn:hover { background: var(--surface-2); color: var(--text); }
       .diff-btn.active { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+      .cat-bar {
+        display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem;
+      }
+      .cat-btn {
+        padding: 0.3rem 0.65rem;
+        background: var(--surface); color: var(--text-muted);
+        border: 1px solid var(--border); border-radius: 999px;
+        font-size: 0.78rem; font-weight: 500; cursor: pointer;
+        transition: background 0.12s, color 0.12s, border-color 0.12s;
+        white-space: nowrap;
+      }
+      .cat-btn:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
+      .cat-btn.active { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
       .diff-badge {
         display: inline-block; padding: 0.15rem 0.55rem;
         border-radius: var(--radius-sm); font-size: 0.7rem; font-weight: 700;
@@ -91,7 +104,13 @@ export class QuizComponent {
   readonly keys = ['A', 'B', 'C', 'D'];
   readonly difficulties = DIFFICULTIES;
 
+  readonly categories: string[] = [
+    'All categories',
+    ...[...new Set(this.service.quantities.map(q => q.category))],
+  ];
+
   readonly difficulty = signal<Difficulty>('easy');
+  readonly selectedCategory = signal<string>('All categories');
   readonly score = signal(0);
   readonly answered = signal(0);
   readonly streak = signal(0);
@@ -106,6 +125,12 @@ export class QuizComponent {
   setDifficulty(d: Difficulty): void {
     if (d === this.difficulty()) return;
     this.difficulty.set(d);
+    this.resetState();
+  }
+
+  setCategory(cat: string): void {
+    if (cat === this.selectedCategory()) return;
+    this.selectedCategory.set(cat);
     this.resetState();
   }
 
@@ -135,7 +160,8 @@ export class QuizComponent {
     this.resetState();
   }
 
-  // ---- question generation ---------------------------------------------
+  // ---- helpers -------------------------------------------------------------
+
   private rand<T>(arr: T[]): T {
     return arr[Math.floor(Math.random() * arr.length)];
   }
@@ -158,6 +184,22 @@ export class QuizComponent {
     this.q.set(this.generate());
   }
 
+  private filteredQuantities(): Quantity[] {
+    const cat = this.selectedCategory();
+    if (cat === 'All categories') return this.service.quantities;
+    return this.service.quantities.filter(q => q.category === cat);
+  }
+
+  private filteredConvertible(): Quantity[] {
+    return this.filteredQuantities().filter(q => q.units.length >= 2);
+  }
+
+  private allUnits(): { q: Quantity; u: Unit }[] {
+    return this.filteredQuantities().flatMap((q) => q.units.map((u) => ({ q, u })));
+  }
+
+  // ---- question generation -------------------------------------------------
+
   private generate(): Question {
     switch (this.difficulty()) {
       case 'easy':
@@ -176,10 +218,6 @@ export class QuizComponent {
     }
   }
 
-  private allUnits(): { q: Quantity; u: Unit }[] {
-    return this.service.quantities.flatMap((q) => q.units.map((u) => ({ q, u })));
-  }
-
   private symbolQuestion(): Question {
     const pool = this.allUnits();
     const target = this.rand(pool);
@@ -196,7 +234,8 @@ export class QuizComponent {
   private quantityQuestion(): Question {
     const pool = this.allUnits();
     const target = this.rand(pool);
-    const others = this.shuffle(this.service.quantities.filter((q) => q.id !== target.q.id))
+    const allQuantities = this.service.quantities;
+    const others = this.shuffle(allQuantities.filter((q) => q.id !== target.q.id))
       .slice(0, 3)
       .map((q) => q.name);
     const options = this.shuffle([
@@ -219,8 +258,9 @@ export class QuizComponent {
   }
 
   private conversionQuestion(): Question {
-    const convertible = this.service.convertible;
-    const q = this.rand(convertible);
+    const convertible = this.filteredConvertible();
+    const pool = convertible.length >= 1 ? convertible : this.service.convertible;
+    const q = this.rand(pool);
     const [from, to] = this.shuffle(q.units).slice(0, 2);
     const value = this.rand([1, 2, 5, 10, 25, 100]);
     const answer = this.service.convert(q, from.id, to.id, value);
@@ -240,16 +280,15 @@ export class QuizComponent {
     return { prompt: `Convert ${value} ${from.symbol} to ${to.name} (${to.symbol}).`, hint: `Quantity: ${q.name}`, options };
   }
 
-  // Hard mode: only numeric conversions, distractors are within ±5–35% of the correct answer
   private hardConversionQuestion(): Question {
-    const convertible = this.service.convertible;
-    const q = this.rand(convertible);
+    const convertible = this.filteredConvertible();
+    const pool = convertible.length >= 1 ? convertible : this.service.convertible;
+    const q = this.rand(pool);
     const [from, to] = this.shuffle(q.units).slice(0, 2);
     const value = this.rand([1, 2, 5, 10, 25, 100]);
     const answer = this.service.convert(q, from.id, to.id, value);
     const fAnswer = fmt(answer);
 
-    // Close perturbation factors — within 5–35% offset
     const perturbations = [
       1.05, 0.95, 1.12, 0.88, 1.20, 0.80, 1.35, 0.65, 1.08, 0.92,
     ];
@@ -261,7 +300,6 @@ export class QuizComponent {
       const candidate = fmt(answer * factor);
       if (candidate !== fAnswer) wrongs.add(candidate);
     }
-    // Fallback: if answer is near zero some perturbations produce same fmt — use additive noise
     if (wrongs.size < 3) {
       const step = Math.abs(answer) < 1e-6 ? 1 : answer;
       for (const delta of [0.1, -0.1, 0.3, -0.3, 0.5]) {

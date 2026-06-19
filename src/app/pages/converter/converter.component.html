@@ -1,7 +1,7 @@
 <h2>Converter</h2>
 <p class="page-intro">
   Convert any unit to a directly related one — e.g. mile&nbsp;↔&nbsp;kilometre. Pick a quantity,
-  then a unit on each side. Conversions only ever offer physically compatible units.
+  then a unit on each side. Type in either field — both update instantly.
 </p>
 
 <div class="converter-layout">
@@ -15,7 +15,7 @@
 
     <div class="convert-grid">
       <div>
-        <label class="field-label" for="from">From</label>
+        <label class="field-label" for="fromVal">From</label>
         <input class="input" id="fromVal" type="number" inputmode="decimal" [ngModel]="value"
           (ngModelChange)="onValueChange($event)" />
         <select class="input" id="from" style="margin-top: 0.5rem;" [ngModel]="fromId"
@@ -29,8 +29,13 @@
       <button class="btn btn-icon swap" type="button" (click)="swap()" aria-label="Swap units" title="Swap">⇄</button>
 
       <div>
-        <label class="field-label" for="to">To</label>
-        <div class="result-box">{{ formattedResult }}</div>
+        <label class="field-label" for="toVal">To</label>
+        <input class="input" id="toVal" type="number" inputmode="decimal"
+          [ngModel]="displayResult"
+          (ngModelChange)="onToValueChange($event)" />
+        @if (compoundResult(); as compound) {
+          <p class="compound-hint">= {{ compound }}</p>
+        }
         <select class="input" id="to" style="margin-top: 0.5rem;" [ngModel]="toId" (ngModelChange)="onToChange($event)">
           @for (u of units(); track u.id) {
           <option [value]="u.id">{{ u.name }} ({{ u.symbol }})</option>
@@ -40,10 +45,18 @@
     </div>
 
     <div class="convert-summary">
-      <span class="mono">{{ fmt(value) }} {{ fromSymbol }} = {{ formattedResult }} {{ toSymbol }}</span>
+      <span class="mono">
+        {{ fmt(value) }} {{ fromSymbol }} = {{ formattedResult }} {{ toSymbol }}
+        @if (compoundResult(); as compound) {
+          <span style="color: var(--accent-text); font-weight: 600;">({{ compound }})</span>
+        }
+      </span>
       <div class="summary-actions">
+        <button class="btn btn-ghost" type="button" (click)="copyResult()">
+          {{ resultCopied() ? 'Copied!' : 'Copy result' }}
+        </button>
         <button class="btn btn-ghost" type="button" (click)="copyLink()">
-          {{ copied() ? 'Copied!' : 'Copy Url' }}
+          {{ copied() ? 'Copied!' : 'Copy URL' }}
         </button>
         <button class="btn btn-ghost" type="button" (click)="toggleFavourite()">
           {{ isFav() ? '★ Saved' : '☆ Save pair' }}
@@ -85,9 +98,9 @@
         <p style="color: var(--text-faint); font-size: 0.85rem; margin: 0.25rem 0 0;">
           {{ fmt(value) }} {{ fromSymbol }} expressed in every unit of this quantity.
         </p>
-      </div>      
+      </div>
     </div>
-    
+
     <table style="margin-top: 0.75rem;">
       <thead>
         <tr>
@@ -105,6 +118,6 @@
         </tr>
         }
       </tbody>
-    </table>    
+    </table>
   </div>
 </div>

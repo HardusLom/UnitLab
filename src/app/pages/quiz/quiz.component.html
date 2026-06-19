@@ -15,6 +15,16 @@
   }
 </div>
 
+<div class="cat-bar">
+  @for (cat of categories; track cat) {
+    <button class="cat-btn"
+            [class.active]="selectedCategory() === cat"
+            (click)="setCategory(cat)">
+      {{ cat }}
+    </button>
+  }
+</div>
+
 <div class="scorebar card">
   <div><span class="score-label">Score</span><span class="score-val">{{ score() }}</span></div>
   <div><span class="score-label">Answered</span><span class="score-val">{{ answered() }}</span></div>

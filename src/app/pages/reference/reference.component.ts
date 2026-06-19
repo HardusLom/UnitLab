@@ -51,7 +51,10 @@ export class ReferenceComponent {
 
   readonly term = signal('');
   readonly sys = signal<SystemId | 'all'>('all');
+  readonly selectedCategory = signal<string | 'all'>('all');
   private readonly expandedCategories = signal<Set<string>>(new Set());
+
+  readonly categories: string[] = [...new Set(this.service.quantities.map(q => q.category))];
 
   readonly totalUnits = this.service.quantities.reduce((n, q) => n + q.units.length, 0);
 
@@ -67,15 +70,17 @@ export class ReferenceComponent {
   readonly groups = computed<Group[]>(() => {
     const q = this.term().trim().toLowerCase();
     const sys = this.sys();
+    const cat = this.selectedCategory();
     const filtered = this.allRows.filter((r) => {
       const matchSys = sys === 'all' || r.system === sys;
+      const matchCat = cat === 'all' || r.qtyCategory === cat;
       const matchTerm =
         !q ||
         r.qty.toLowerCase().includes(q) ||
         r.unitName.toLowerCase().includes(q) ||
         r.unitSym.toLowerCase().includes(q) ||
         r.qsym.toLowerCase().includes(q);
-      return matchSys && matchTerm;
+      return matchSys && matchCat && matchTerm;
     });
     const byCat = new Map<string, Row[]>();
     for (const r of filtered) {

@@ -13,6 +13,12 @@
       <button class="chip" [class.active]="sys() === s.id" (click)="sys.set(s.id)">{{ s.label }}</button>
     }
   </div>
+  <div class="chip-row" style="margin-top: 0.5rem;">
+    <button class="chip" [class.active]="selectedCategory() === 'all'" (click)="selectedCategory.set('all')">All categories</button>
+    @for (cat of categories; track cat) {
+      <button class="chip" [class.active]="selectedCategory() === cat" (click)="selectedCategory.set(cat)">{{ cat }}</button>
+    }
+  </div>
 </div>
 
 <p style="color: var(--text-faint); font-size: 0.85rem; margin: 1.25rem 0 0.5rem;">

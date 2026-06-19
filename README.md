@@ -1,8 +1,6 @@
 # Measure — units, quantities & conversions
 
-A small Angular 18 (standalone components) web app for exploring measurement units and converting
-between them. Built to be dependency-light so it runs in a fresh project with no UI framework — drop
-your own PrimeNG/Apollo styling in later.
+An Angular 18 (standalone components) SPA for exploring measurement units, converting between them, and learning via quiz. No UI framework — plain CSS with CSS variables and `prefers-color-scheme` for light/dark theming. Ships as a PWA.
 
 ## Run it
 
@@ -13,41 +11,41 @@ npm start
 
 Then open <http://localhost:4200>. (`npm start` runs `ng serve` in development mode.)
 
-> Requires Node 18.19+ / 20.9+ and the Angular CLI conventions that ship with Angular 18. You don't
-> need a global CLI install — the local `@angular/cli` dev dependency is used via the `ng` script.
+> Requires Node 18.19+ / 20.9+. No global Angular CLI install needed — the local `@angular/cli` dev dependency is used via the `ng` script.
 
-## Menu / features
+## Pages
 
 | Route | What it does |
 |-------|--------------|
-| **Reference** (`/reference`) | The full categorised table of every quantity, its systems and unit symbols. Search + filter by measurement system. Checkbox on each row pins it to a Favourites table at the top of the page. Each row also has a ⇄ button that opens it directly in the Converter. |
-| **Converter** (`/converter`) | Pick a quantity, then a unit on each side, and convert live (e.g. mile ↔ kilometre). Only physically compatible units are ever offered. Includes a full breakdown into every unit, a swap button, and a "save pair" favourite toggle. Deep-linkable via `?q=&from=&to=&v=`. |
-| **Prefixes** (`/prefixes`) | SI prefix scaler — express a value across every prefix from yotta (10²⁴) to yocto (10⁻²⁴). |
+| **Reference** (`/reference`) | Full categorised table of every unit and symbol. Filter by measurement system, search, expand a category's description panel with ⓘ, checkbox any row to pin it to a live Favourites table at the top. Each row has a ⇄ button that opens the unit directly in the Converter. |
+| **Converter** (`/converter`) | Pick a quantity and a unit on each side; both fields update live. Features: compound-unit display (e.g. 5 ft 9 in), scale visualiser bar, formula explainer (e.g. °F = °C × 1.8 + 32), multi-step conversion chain, cards/table toggle for the full breakdown, copy-result and copy-link buttons, favourite toggle. Deep-linkable via `?q=&from=&to=&v=`. |
+| **Prefixes** (`/prefixes`) | SI prefix scaler — express a value across all 20 prefixes from yotta (10²⁴) to yocto (10⁻²⁴). |
 | **Formulas** (`/formulas`) | Searchable reference of common physics formulas with each variable and its SI unit. |
-| **Quiz** (`/quiz`) | Randomised multiple-choice practice with three difficulty levels (Easy / Medium / Hard). Score, streak, and per-difficulty best scores saved locally. |
-| **Saved** (`/saved`) | Favourite conversion pairs and recent conversion history; tap any item to reopen it in the converter. |
+| **Quiz** (`/quiz`) | Randomised multiple-choice practice. Three difficulty levels (Easy / Medium / Hard) and a category filter. Score, streak, and per-difficulty best scores saved locally. |
+| **Saved** (`/saved`) | Favourite conversion pairs and recent conversion history; tap any item to reopen it in the Converter. |
+
+### Global search
+
+The header search box filters all units by name, symbol, or quantity as you type. Selecting a result (mouse or ↑ ↓ Enter) opens it in the Converter.
 
 ## How conversions work
 
-Each quantity defines a base unit. Every unit carries a `factor` (and, for temperature only, an
-`offset`) so that:
+Each quantity defines a base unit. Every unit carries a `factor` (and, for temperature only, an `offset`) so that:
 
 ```
 base  = value * factor + (offset ?? 0)
 value = (base - (offset ?? 0)) / factor
 ```
 
-To convert A → B within a quantity: take A to base, then base to B. Factors are exact where an exact
-definition exists (e.g. 1 inch = 0.0254 m, 1 lb = 0.453 592 37 kg). Temperature uses affine offsets
-(°C, °F, K, °R). See `src/app/data/units.data.ts` — that single file is the source of truth for
-units, SI prefixes, formulas, and category metadata, so most customisation happens there.
+To convert A → B: take A to base, then base to B. Factors are exact where an exact definition exists (1 inch = 0.0254 m, 1 lb = 0.453 592 37 kg). Temperature uses affine offsets (°C, °F, K, °R).
+
+`src/app/data/units.data.ts` is the single source of truth for units, SI prefixes, formulas, and category metadata.
 
 ## Project layout
 
 ```
 scripts/
   set-version.mjs              stamps environment.ts with the current version before each build
-  gen-favicon.mjs              generates favicon assets
 src/
   main.ts                      bootstrap + router + service-worker registration
   manifest.webmanifest         PWA install metadata and icon set
@@ -56,7 +54,7 @@ src/
     environment.ts             version string (written by set-version.mjs)
   assets/icons/                PNG icons for PWA (72 → 512 px)
   app/
-    app.component.ts           shell: header, nav menu, router outlet
+    app.component.ts/html      shell: header (global search, hamburger nav), footer, router outlet
     app.routes.ts              lazy-loaded routes
     models/unit.model.ts       types: Unit, Quantity, Formula, SiPrefix, Favourite, HistoryItem
     data/units.data.ts         the dataset (quantities, prefixes, formulas, category metadata)
@@ -71,18 +69,11 @@ ngsw-config.json               Angular service-worker caching config
 
 ## Notes / things you'll likely customise
 
-- **Styling is deliberately plain CSS** (CSS variables, no framework) so it runs anywhere. To match
-  your real stack, swap the components' inline templates for PrimeNG components and the Apollo theme.
-- **Persistence is `localStorage`** (favourites, history, per-difficulty best scores). Replace
-  `StorageService` with an API/EF Core-backed service if you want it server-side.
-- **`strictTemplates` is off** in `tsconfig.json` to keep the first build smooth; turn it back on once
-  you're iterating in your editor.
-- **Adding a unit**: add an entry to the relevant quantity's `units[]` in `units.data.ts` with a
-  unique `id`, a `symbol`, a `system`, and a `factor` relative to that quantity's base unit. It will
-  appear automatically in the reference, converter, breakdown and quiz.
-- **`year`** uses the Julian year (365.25 days); change the factor in `units.data.ts` if you prefer
-  365 days.
-- **PWA**: the app installs as a standalone PWA in production builds. The service worker is disabled
-  in dev mode (`ng serve`).
+- **Styling is plain CSS** (CSS variables, no framework). To match your stack, swap the components' templates for PrimeNG / Angular Material components.
+- **Persistence is `localStorage`** (favourites, history, per-difficulty best scores). Replace `StorageService` with an API-backed service for server-side storage.
+- **`strictTemplates` is off** in `tsconfig.json`; turn it on when iterating in your editor.
+- **Adding a unit**: add an entry to the relevant quantity's `units[]` in `units.data.ts` with a unique `id`, a `symbol`, a `system`, and a `factor` relative to that quantity's base unit. It appears automatically in the reference, converter, breakdown, and quiz.
+- **`year`** uses the Julian year (365.25 days); change the factor in `units.data.ts` if you prefer 365 days.
+- **PWA**: the app installs as a standalone PWA in production builds. The service worker is disabled in dev mode (`ng serve`).
 
 Built June 2026.

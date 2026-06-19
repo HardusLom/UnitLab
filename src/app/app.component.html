@@ -31,9 +31,12 @@
              (blur)="onSearchBlur()" />
       @if (searchResults().length > 0) {
         <div class="search-dropdown" role="listbox">
-          @for (r of searchResults(); track r.quantityId + r.unitId) {
+          @for (r of searchResults(); track r.quantityId + r.unitId; let i = $index) {
             <button class="search-item" type="button" role="option"
+                    [class.active]="activeIndex() === i"
+                    [attr.aria-selected]="activeIndex() === i"
                     (mousedown)="$event.preventDefault()"
+                    (mousemove)="activeIndex.set(i)"
                     (click)="selectResult(r)">
               <span class="search-item-main">
                 <span>{{ r.unitName }}</span>
@@ -53,5 +56,5 @@
 </main>
 
 <footer class="app-footer">
-  <span>Built with Angular {{ angularVersion }} · all conversions use exact factors where defined.</span>
+  <span>&copy; {{ currentYear }} Measure &amp; Convert · all conversions use exact factors where defined.</span>
 </footer>

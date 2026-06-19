@@ -285,7 +285,8 @@ tbody tr:last-child td { border-bottom: none; }
   transition: background 0.1s;
 }
 .search-item:last-child { border-bottom: none; }
-.search-item:hover { background: var(--surface-2); }
+.search-item:hover,
+.search-item.active { background: var(--surface-2); }
 .search-item-main {
   display: flex;
   align-items: center;

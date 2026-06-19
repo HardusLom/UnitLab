@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ConversionService } from './services/conversion.service';
@@ -19,7 +19,7 @@ interface SearchResult {
   templateUrl: './app.component.html',
 })
 export class AppComponent {
-  readonly angularVersion = '18';
+  readonly currentYear = new Date().getFullYear();
   readonly menuOpen = signal(false);
   readonly searchTerm = signal('');
 
@@ -35,6 +35,15 @@ export class AppComponent {
       unitSym: u.symbol,
     }))
   );
+
+  readonly activeIndex = signal(-1);
+
+  constructor() {
+    effect(() => {
+      this.searchTerm();
+      this.activeIndex.set(-1);
+    }, { allowSignalWrites: true });
+  }
 
   readonly searchResults = computed<SearchResult[]>(() => {
     const q = this.searchTerm().trim().toLowerCase();
@@ -52,15 +61,34 @@ export class AppComponent {
   selectResult(r: SearchResult): void {
     this.router.navigate(['/converter'], { queryParams: { q: r.quantityId, from: r.unitId } });
     this.searchTerm.set('');
+    this.activeIndex.set(-1);
     this.menuOpen.set(false);
   }
 
   onSearchKey(event: KeyboardEvent): void {
-    if (event.key === 'Escape') this.searchTerm.set('');
+    const results = this.searchResults();
+    const idx = this.activeIndex();
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeIndex.set(Math.min(idx + 1, results.length - 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeIndex.set(Math.max(idx - 1, -1));
+    } else if (event.key === 'Enter' && idx >= 0) {
+      event.preventDefault();
+      this.selectResult(results[idx]);
+    } else if (event.key === 'Escape') {
+      this.searchTerm.set('');
+      this.activeIndex.set(-1);
+    }
   }
 
   onSearchBlur(): void {
-    setTimeout(() => this.searchTerm.set(''), 150);
+    setTimeout(() => {
+      this.searchTerm.set('');
+      this.activeIndex.set(-1);
+    }, 150);
   }
 
   readonly nav: NavItem[] = [

@@ -28,10 +28,22 @@ Angular 18 standalone-component SPA. No UI framework — plain CSS with CSS vari
 | `src/app/models/unit.model.ts` | All TypeScript interfaces: `Unit`, `Quantity`, `Formula`, `SiPrefix`, `Favourite`, `HistoryItem`. |
 | `src/app/services/conversion.service.ts` | Stateless math: `convert()`, `breakdown()`, and dataset lookups. |
 | `src/app/services/storage.service.ts` | Angular signals wrapping `localStorage` for favourites, history (capped at 25), and per-difficulty quiz best scores. |
+| `src/app/app.component.ts` | Shell: header with global unit search, hamburger nav, footer, router outlet. |
 | `src/app/app.routes.ts` | Lazy-loaded routes for all six pages. |
 | `src/manifest.webmanifest` | PWA manifest (name, icons, display mode). |
 | `ngsw-config.json` | Angular service-worker caching config. |
 | `scripts/set-version.mjs` | Stamps `environment.ts` with current version before every build. |
+
+### Pages
+
+| Route | Component | Description |
+|-------|-----------|-------------|
+| `/reference` | `ReferenceComponent` | Full categorised unit table with search, system filter, per-row favourites checkbox, category info panels, and ⇄ deep-link button. |
+| `/converter` | `ConverterComponent` | Live converter with compound-unit display, scale visualiser, formula explainer, chain steps, cards/table view toggle, copy-link, copy-result, favourite toggle, and conversion breakdown. |
+| `/prefixes` | `PrefixesComponent` | SI prefix scaler across all 20 prefixes (yotta → yocto). |
+| `/formulas` | `FormulasComponent` | Searchable physics formula reference with variables and SI units. |
+| `/quiz` | `QuizComponent` | Randomised multiple-choice quiz with three difficulty levels and category filter; per-difficulty best scores persisted. |
+| `/saved` | `SavedComponent` | Favourite conversion pairs and recent history; tap to reopen in Converter. |
 
 ### Conversion math
 
@@ -48,9 +60,17 @@ value = (base - (offset ?? 0)) / factor
 
 Add an entry to the relevant quantity's `units[]` in `units.data.ts` with a unique `id`, `name`, `symbol`, `system` (`si | metric | imperial | us | other`), and `factor` relative to the quantity's base unit. It propagates automatically to the reference table, converter, breakdown and quiz.
 
+### Global header search
+
+`AppComponent` builds an in-memory flat list of all units on startup and filters it reactively as the user types. Selecting a result navigates to `/converter?q=<quantityId>&from=<unitId>`. Keyboard navigation (↑ ↓ Enter Escape) is supported; the dropdown closes on blur with a 150 ms delay to allow click events to fire first.
+
 ### Converter deep-linking
 
 The `/converter` route reads `?q=&from=&to=&v=` query params on load — maintain these when modifying the converter component. The reference page's per-row ⇄ button navigates to `/converter?q=<quantityId>&from=<unitId>`.
+
+### Converter — compound units
+
+`COMPOUND_CHAINS` in `ConverterComponent` maps quantity ids to ordered unit-id chains. When the to-unit is the first unit in a chain, a compound result (e.g. "5 ft 9 in") appears below the result input. Chains are defined for: `length` (ft→in), `mass` (st→lb, lb→oz), `time` (wk→d, d→h→min→s, h→min→s, min→s), `angle` (deg→arcmin→arcsec).
 
 ### Scroll behaviour
 
@@ -74,6 +94,7 @@ The reference page has a session-only Favourites table (in-memory `Set` signal, 
 
 - All component templates must live in a separate `.html` file (`templateUrl`) — never use inline `template` strings.
 - Component, template, and style files share the same directory and base name (e.g. `foo.component.ts`, `foo.component.html`, `foo.component.css`).
+- Inline `styles: [...]` arrays are acceptable for component-scoped styles; external `.css` files are not required.
 
 ## Notes
 
