@@ -296,12 +296,23 @@ export class ConverterComponent implements OnInit, OnDestroy {
 
   private paramSub?: Subscription;
 
+  private defaultFrom(q: Quantity): string {
+    return q.units.find(u => u.factor === 1 && (u.offset ?? 0) === 0)?.id ?? q.units[0].id;
+  }
+
+  private defaultTo(q: Quantity, fromId: string): string {
+    const idx = q.units.findIndex(u => u.id === fromId);
+    const after = q.units.slice(idx + 1).find(u => u.id !== fromId);
+    if (after) return after.id;
+    return q.units.find(u => u.id !== fromId)?.id ?? q.units[1 % q.units.length].id;
+  }
+
   ngOnInit(): void {
     this.paramSub = this.route.queryParamMap.subscribe((p) => {
       const qId = p.get('q');
       const q = (qId && this.service.getQuantity(qId)) || this.service.convertible[0];
-      const newFrom = p.get('from') && this.service.getUnit(q, p.get('from')!) ? p.get('from')! : q.units[0].id;
-      const newTo = p.get('to') && this.service.getUnit(q, p.get('to')!) ? p.get('to')! : q.units[1].id;
+      const newFrom = p.get('from') && this.service.getUnit(q, p.get('from')!) ? p.get('from')! : this.defaultFrom(q);
+      const newTo = p.get('to') && this.service.getUnit(q, p.get('to')!) ? p.get('to')! : this.defaultTo(q, newFrom);
       const v = Number(p.get('v'));
       const quantityChanged = this.quantityId !== q.id;
       this.quantity = q;
@@ -337,8 +348,8 @@ export class ConverterComponent implements OnInit, OnDestroy {
     if (!q) return;
     this.quantity = q;
     this.quantityId = id;
-    this.fromId = q.units[0].id;
-    this.toId = q.units[1].id;
+    this.fromId = this.defaultFrom(q);
+    this.toId = this.defaultTo(q, this.fromId);
     this.chainSteps.set([]);
     this.recompute();
   }
