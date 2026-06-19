@@ -301,6 +301,65 @@ export const QUANTITIES: Quantity[] = [
   },
 ];
 
+export const CATEGORY_INFO: Record<string, string> = {
+  'Length & area':
+    'Length is the one-dimensional extent of an object; area is the two-dimensional surface it covers. ' +
+    'The SI unit of length is the metre (m) and area is measured in square metres (m²). ' +
+    'A key gotcha: squaring the unit squares the scale — 1 km² contains 1,000,000 m², not 1,000.',
+  'Mass & force':
+    'Mass is the amount of matter in an object (kg) and never changes wherever you go. ' +
+    'Weight is the gravitational force acting on that mass (newtons) and varies with location. ' +
+    'On the Moon you weigh about six times less but your mass is identical. ' +
+    'One newton is roughly the force needed to hold a medium-sized apple against Earth\'s gravity.',
+  'Volume & capacity':
+    'Volume measures the three-dimensional space something occupies. One litre equals one cubic decimetre (dm³). ' +
+    'US and imperial gallons are not the same: a US gallon is 3.785 L while an imperial gallon is 4.546 L — ' +
+    'about 20% larger. Always check which system a recipe or fuel figure uses.',
+  'Speed & acceleration':
+    'Speed is the rate of change of position; velocity adds a direction to that rate. ' +
+    'Acceleration is how quickly velocity changes. ' +
+    'Standard gravity (g ≈ 9.81 m/s²) is the acceleration felt in free fall near Earth\'s surface ' +
+    'and is a handy benchmark for comparing forces on the human body (e.g. fighter pilots pull 9g in tight turns).',
+  'Pressure & stress':
+    'Pressure is force spread over an area (P = F / A). One pascal (Pa) is tiny — just 1 N/m². ' +
+    'Atmospheric pressure at sea level is about 101,325 Pa (1 atm), which is why weather reports use hPa or mbar. ' +
+    'Car tyres are typically inflated to 2–3 bar (29–44 psi). Blood pressure is measured in mmHg.',
+  'Energy, work & power':
+    'Energy is the capacity to do work; power is how quickly that work is done (1 W = 1 J/s). ' +
+    'A dietary calorie (kcal) is 4,184 joules — enough to raise 1 litre of water by 1 °C. ' +
+    'A 60 W bulb consumes 60 joules every second. Running a 1 kW kettle for an hour uses 1 kWh, ' +
+    'roughly the same energy as cycling 20 km.',
+  'Temperature':
+    'Celsius sets 0 °C at water\'s freezing point; Fahrenheit sets 32 °F there. ' +
+    'Kelvin uses the same degree size as Celsius but starts at absolute zero (−273.15 °C), ' +
+    'the theoretical coldest possible temperature — so negative kelvin values don\'t exist. ' +
+    'Quick rule of thumb: °F ≈ °C × 1.8 + 32.',
+  'Time & frequency':
+    'Time is the SI base unit (second, s). Frequency counts repeating events per second — 1 hertz (Hz) is one cycle per second. ' +
+    'Human hearing spans roughly 20 Hz to 20,000 Hz. ' +
+    'Your Wi-Fi radio operates at 2.4 GHz or 5 GHz — billions of electromagnetic oscillations every second.',
+  'Angle':
+    'A full rotation equals 2π radians, 360°, or 400 gradians. Radians are the SI unit and simplify ' +
+    'calculus formulas: arc length = radius × angle (in radians). ' +
+    'Arcminutes (1/60°) and arcseconds (1/3600°) appear in astronomy and navigation. ' +
+    'The full Moon spans about 30 arcminutes as seen from Earth.',
+  'Data & information':
+    'All digital data is built from bits (0 or 1); 8 bits form one byte. ' +
+    'Decimal prefixes (kB, MB, GB) use powers of 1,000 per the SI convention; ' +
+    'binary prefixes (KiB, MiB, GiB) use powers of 1,024. ' +
+    'A "1 TB" drive holds 1,000,000,000,000 bytes, but your OS may display it as ~931 GiB because it counts in binary.',
+  'Density & concentration':
+    'Density is mass per unit volume (ρ = m / V). Water\'s density is 1,000 kg/m³ (1 g/cm³) — ' +
+    'a convenient benchmark: objects denser than water sink, lighter ones float. ' +
+    'The mole is the SI unit for amount of substance: one mole contains exactly 6.022 × 10²³ particles ' +
+    '(Avogadro\'s number), letting chemists count atoms by weighing them.',
+  'Electricity & magnetism':
+    'Current (ampere, A) measures how much charge flows per second; voltage (volt, V) is the electrical ' +
+    '"pressure" that drives it; resistance (ohm, Ω) opposes the flow — linked by Ohm\'s law: V = I × R. ' +
+    'Capacitance (farad, F) measures charge stored per volt. A single farad is huge; ' +
+    'real components are typically in the microfarad (µF) or picofarad (pF) range.',
+};
+
 export const SI_PREFIXES: SiPrefix[] = [
   { name: 'yotta', symbol: 'Y', exponent: 24 },
   { name: 'zetta', symbol: 'Z', exponent: 21 },
