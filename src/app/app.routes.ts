@@ -36,5 +36,11 @@ export const routes: Routes = [
     title: 'Saved · UnitLab',
     loadComponent: () => import('./pages/saved/saved.component').then((m) => m.SavedComponent),
   },
+  {
+    path: 'manual',
+    title: 'User Manual · UnitLab',
+    loadComponent: () =>
+      import('./pages/manual/manual.component').then((m) => m.ManualComponent),
+  },
   { path: '**', redirectTo: 'reference' },
 ];

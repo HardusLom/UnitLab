@@ -114,5 +114,6 @@ export class AppComponent {
     { path: 'formulas', label: 'Formulas', icon: 'ƒ' },
     { path: 'quiz', label: 'Quiz', icon: '?' },
     { path: 'saved', label: 'Saved', icon: '★' },
+    { path: 'manual', label: 'Manual', icon: '📖' },
   ];
 }

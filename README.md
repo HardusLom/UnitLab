@@ -17,12 +17,13 @@ Then open <http://localhost:4200>. (`npm start` runs `ng serve` in development m
 
 | Route | What it does |
 |-------|--------------|
-| **Reference** (`/reference`) | Full categorised table of every unit and symbol. Filter by measurement system, search, expand a category's description panel with ⓘ, checkbox any row to pin it to a live Favourites table at the top. Each row has a ⇄ button that opens the unit directly in the Converter, and a **𝐖** link to the unit's Wikipedia article (where available). |
-| **Converter** (`/converter`) | Pick a quantity and a unit on each side; both fields update live. Features: compound-unit display (e.g. 5 ft 9 in), scale visualiser bar, formula explainer (e.g. °F = °C × 1.8 + 32), multi-step conversion chain, cards/table toggle for the full breakdown, copy-result and copy-link buttons, favourite toggle. Deep-linkable via `?q=&from=&to=&v=`. |
+| **Reference** (`/reference`) | Full categorised table of every unit and symbol. Search by name or symbol, filter by measurement system (chips), switch categories with the tab bar (or **All**), and expand any category's description panel with the ⓘ toggle. Each row's unit name and ⇄ button open the unit directly in the Converter, plus a **𝐖** link to the unit's Wikipedia article (where available). |
+| **Converter** (`/converter`) | Pick a quantity and a unit on each side; type in either field and both update live. Features: compound-unit display (e.g. 5 ft 9 in), size-comparison visualiser bar, formula explainer (e.g. °F = °C × 1.8 + 32), an "all units" breakdown table (tap a row to set the To unit), swap, Copy result / Copy URL buttons, and a favourite (Save pair) toggle. Deep-linkable via `?q=&from=&to=&v=`. |
 | **Prefixes** (`/prefixes`) | SI prefix scaler — express a value across all 20 prefixes from yotta (10²⁴) to yocto (10⁻²⁴). |
-| **Formulas** (`/formulas`) | Searchable reference of common physics formulas with each variable and its SI unit. |
-| **Quiz** (`/quiz`) | Randomised multiple-choice practice. Three difficulty levels (Easy / Medium / Hard) and a category filter. Score, streak, and per-difficulty best scores saved locally. |
+| **Formulas** (`/formulas`) | Searchable reference of common physics formulas with each variable and its SI unit; filter by area. |
+| **Quiz** (`/quiz`) | Randomised multiple-choice practice. Three difficulty levels (Easy / Medium / Hard) and a category filter. Score, answered count, streak, and per-difficulty best scores saved locally. |
 | **Saved** (`/saved`) | Favourite conversion pairs and recent conversion history; tap any item to reopen it in the Converter. |
+| **Manual** (`/manual`) | Built-in user manual with a sticky left-hand table of contents (scroll-spy) covering every page, tips, PWA install, and FAQ. |
 
 ### Global search
 
@@ -65,7 +66,7 @@ src/
     shared/
       format.util.ts             fmt() — locale-neutral number formatter (thin-space thousands, scientific at extremes)
     pages/
-      reference/  converter/  prefixes/  formulas/  quiz/  saved/
+      reference/  converter/  prefixes/  formulas/  quiz/  saved/  manual/
 ngsw-config.json               Angular service-worker caching config
 ```
 

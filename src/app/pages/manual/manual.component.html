@@ -1,0 +1,246 @@
+<div class="manual-layout">
+  <!-- ------------------------------------------------------- left TOC nav -->
+  <aside class="manual-toc" aria-label="User manual contents">
+    <nav>
+      <p class="toc-title">Contents</p>
+      <ul>
+        @for (item of toc; track item.id) {
+          <li>
+            <a [href]="'#' + item.id"
+               [class.active]="activeId() === item.id"
+               (click)="scrollTo($event, item.id)">{{ item.label }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ----------------------------------------------------------- content -->
+  <article class="manual-content">
+    <header class="manual-hero">
+      <h2>UnitLab User Manual</h2>
+      <p class="page-intro">
+        Everything you need to look up units, run conversions, explore SI prefixes
+        and physics formulas, and test yourself with the quiz. Use the contents on
+        the left to jump to any section.
+      </p>
+    </header>
+
+    <section #section id="overview" class="manual-section">
+      <h3>Overview</h3>
+      <p>
+        UnitLab is a reference and conversion tool covering a wide range of physical
+        quantities — length, mass, time, temperature, energy, and many more. It runs
+        entirely in your browser, works offline once installed, and stores your
+        favourites and history locally on your device.
+      </p>
+      <p>The app is organised into six main pages:</p>
+      <ul class="manual-list">
+        <li><strong>Reference</strong> — a searchable, categorised table of every unit.</li>
+        <li><strong>Converter</strong> — convert any value between two units of the same quantity.</li>
+        <li><strong>Prefixes</strong> — scale a value across all 20 SI prefixes.</li>
+        <li><strong>Formulas</strong> — a physics formula reference with variables and SI units.</li>
+        <li><strong>Quiz</strong> — a multiple-choice quiz with three difficulty levels.</li>
+        <li><strong>Saved</strong> — your favourite conversion pairs and recent history.</li>
+      </ul>
+    </section>
+
+    <section #section id="getting-started" class="manual-section">
+      <h3>Getting started</h3>
+      <p>
+        No account or setup is required — open the app and you land on the
+        <strong>Reference</strong> page. A typical first task is a quick conversion:
+      </p>
+      <ol class="manual-list">
+        <li>Open the <strong>Converter</strong> from the menu.</li>
+        <li>Pick a quantity (e.g. <em>Length</em>).</li>
+        <li>Choose the unit to convert <em>from</em> and the unit to convert <em>to</em>.</li>
+        <li>Type a value — the result updates instantly as you type.</li>
+      </ol>
+      <p>
+        Everything you mark as a favourite or convert is remembered automatically, so
+        you can return to it later on the <strong>Saved</strong> page.
+      </p>
+    </section>
+
+    <section #section id="navigation" class="manual-section">
+      <h3>Navigation &amp; search</h3>
+      <p>
+        The header is available on every page. It contains the app menu and a global
+        unit search box.
+      </p>
+      <ul class="manual-list">
+        <li><strong>Menu</strong> — switch between pages. On narrow screens, tap the
+          <span class="kbd">☰</span> button to open the menu.</li>
+        <li><strong>Global search</strong> — start typing a unit, symbol, or quantity
+          name. Results appear in a dropdown.</li>
+      </ul>
+      <p>The search is context-aware about where it sends you:</p>
+      <ul class="manual-list">
+        <li>On the <strong>Reference</strong> page, selecting a result filters the table.</li>
+        <li>On the <strong>Formulas</strong> page, it filters formulas by quantity.</li>
+        <li>Anywhere else, it opens the <strong>Converter</strong> pre-loaded with that unit.</li>
+      </ul>
+      <p>
+        You can drive the search dropdown entirely from the keyboard:
+        <span class="kbd">↑</span> <span class="kbd">↓</span> to move,
+        <span class="kbd">Enter</span> to select, and <span class="kbd">Esc</span> to clear.
+      </p>
+    </section>
+
+    <section #section id="reference" class="manual-section">
+      <h3>Reference table</h3>
+      <p>
+        The Reference page lists every unit, grouped by quantity. Each row shows the
+        unit name, symbol, the measurement system it belongs to, and how it relates to
+        the base unit.
+      </p>
+      <ul class="manual-list">
+        <li><strong>Search</strong> — narrow the table to matching quantities or units.</li>
+        <li><strong>System filter</strong> — chips at the top show only SI, metric,
+          imperial, US, or other units (or <em>All Systems</em>).</li>
+        <li><strong>Category tabs</strong> — switch between categories of quantities, or
+          pick <em>All</em> to see every category at once.</li>
+        <li><strong>ⓘ info toggle</strong> — each category has an info button that
+          expands a short description of what the quantity measures.</li>
+        <li><strong>⇄ button</strong> (and the unit name link) — jumps straight to the
+          Converter with that unit loaded.</li>
+        <li><strong>𝐖 link</strong> — where available, opens the unit's Wikipedia article
+          in a new tab.</li>
+      </ul>
+    </section>
+
+    <section #section id="converter" class="manual-section">
+      <h3>Converter</h3>
+      <p>
+        The Converter performs live conversions between any two units of the same
+        quantity. Results update as you type — there is no convert button to press.
+      </p>
+      <p>
+        Type in <em>either</em> the From or the To field — the other side recalculates
+        instantly. Use the <span class="kbd">⇄</span> button between the fields to swap
+        the two units.
+      </p>
+      <ul class="manual-list">
+        <li><strong>Compound units</strong> — some results also display as a compound
+          value, e.g. <em>5&nbsp;ft&nbsp;9&nbsp;in</em> or
+          <em>1&nbsp;h&nbsp;30&nbsp;min</em>.</li>
+        <li><strong>Formula</strong> — shows the exact expression used for the
+          conversion, e.g. <em>°F = °C × 1.8 + 32</em>.</li>
+        <li><strong>Size comparison</strong> — a visual bar showing the relative size of
+          the two units and their ratio.</li>
+        <li><strong>All units table</strong> — your value expressed in every unit of the
+          quantity; tap any row to make it the To unit.</li>
+        <li><strong>Copy result / Copy URL</strong> — copy the result to your clipboard,
+          or copy a shareable link to the exact conversion.</li>
+        <li><strong>Save pair</strong> — the ☆/★ button saves the conversion pair to your
+          favourites for quick reuse.</li>
+      </ul>
+      <p class="callout">
+        <strong>Deep links:</strong> the Converter's address includes the quantity, both
+        units, and the value. Copy the link to share or bookmark an exact conversion.
+      </p>
+    </section>
+
+    <section #section id="prefixes" class="manual-section">
+      <h3>SI prefixes</h3>
+      <p>
+        The Prefixes page scales a single value across all 20 SI prefixes, from
+        <em>yotta</em> (10²⁴) down to <em>yocto</em> (10⁻²⁴). Enter a value, pick its
+        prefix and unit, and see the equivalent at every other prefix at once — handy
+        for understanding orders of magnitude.
+      </p>
+    </section>
+
+    <section #section id="formulas" class="manual-section">
+      <h3>Formulas</h3>
+      <p>
+        The Formulas page is a searchable reference of common physics formulas. Each
+        entry lists the expression, a short description, the variables involved, and
+        their SI units. Use the search box to filter by name or quantity.
+      </p>
+    </section>
+
+    <section #section id="quiz" class="manual-section">
+      <h3>Quiz</h3>
+      <p>
+        The Quiz tests your knowledge with randomised multiple-choice questions.
+      </p>
+      <ul class="manual-list">
+        <li><strong>Difficulty</strong> — choose <em>Easy</em>, <em>Medium</em>, or
+          <em>Hard</em>.</li>
+        <li><strong>Category filter</strong> — focus on a single category, or test
+          across all of them.</li>
+        <li><strong>Score bar</strong> — tracks your current <em>Score</em>,
+          number <em>Answered</em>, current <em>Streak</em>, and <em>Best</em> score.</li>
+        <li><strong>Best scores</strong> — your highest score is saved separately for
+          each difficulty level.</li>
+        <li><strong>Reset score</strong> — clears the current run to start fresh.</li>
+      </ul>
+    </section>
+
+    <section #section id="saved" class="manual-section">
+      <h3>Saved</h3>
+      <p>
+        The Saved page collects your <strong>favourite conversion pairs</strong> and
+        your <strong>recent history</strong> (the last 25 conversions). Tap any entry to
+        reopen it in the Converter. Everything here is stored locally in your browser.
+      </p>
+    </section>
+
+    <section #section id="tips" class="manual-section">
+      <h3>Tips &amp; shortcuts</h3>
+      <ul class="manual-list">
+        <li>Use the global search to jump anywhere quickly without opening the menu.</li>
+        <li>Copy a Converter link to bookmark an exact conversion for later.</li>
+        <li>Mark frequently used conversions as favourites so they're one tap away on
+          the Saved page.</li>
+        <li>On the Reference page, combine the search box with the system filter to
+          narrow long lists fast.</li>
+        <li>The app remembers your last conversions automatically — no need to save
+          them manually to find them again.</li>
+      </ul>
+    </section>
+
+    <section #section id="install" class="manual-section">
+      <h3>Install as an app</h3>
+      <p>
+        UnitLab is a Progressive Web App (PWA), so you can install it like a native app
+        and use it offline.
+      </p>
+      <ul class="manual-list">
+        <li><strong>Desktop (Chrome / Edge):</strong> click the install icon in the
+          address bar, or open the browser menu and choose <em>Install UnitLab</em>.</li>
+        <li><strong>iOS (Safari):</strong> tap the Share button, then
+          <em>Add to Home Screen</em>.</li>
+        <li><strong>Android (Chrome):</strong> open the browser menu and choose
+          <em>Install app</em> or <em>Add to Home screen</em>.</li>
+      </ul>
+      <p>Once installed, the core pages work without an internet connection.</p>
+    </section>
+
+    <section #section id="faq" class="manual-section">
+      <h3>FAQ</h3>
+      <p class="faq-q">Where is my data stored?</p>
+      <p>
+        Favourites, history, and quiz scores are stored in your browser's local
+        storage on this device only. Nothing is sent to a server.
+      </p>
+      <p class="faq-q">Will I lose my data?</p>
+      <p>
+        Clearing your browser data, or using a different browser or device, will start
+        you with a fresh slate.
+      </p>
+      <p class="faq-q">How accurate are the conversions?</p>
+      <p>
+        Conversions use exact factors where they are defined. Note that the Julian year
+        (365.25 days) is used for the <em>year</em> unit.
+      </p>
+      <p class="faq-q">Which page should I start on?</p>
+      <p>
+        For a quick conversion, use the <strong>Converter</strong>. To browse and learn,
+        start on the <strong>Reference</strong> page.
+      </p>
+    </section>
+  </article>
+</div>

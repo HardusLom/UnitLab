@@ -31,8 +31,6 @@ export class ConverterComponent implements OnInit, OnDestroy {
   quantity?: Quantity;
   readonly copied = signal(false);
   readonly resultCopied = signal(false);
-  readonly chainSteps = signal<string[]>([]);
-  readonly viewMode = signal<'cards' | 'table'>('cards');
 
   private paramSub?: Subscription;
 
@@ -62,13 +60,11 @@ export class ConverterComponent implements OnInit, OnDestroy {
       const newFrom = p.get('from') && this.service.getUnit(q, p.get('from')!) ? p.get('from')! : this.defaultFrom(q);
       const newTo = p.get('to') && this.service.getUnit(q, p.get('to')!) ? p.get('to')! : this.defaultTo(q, newFrom);
       const v = Number(p.get('v'));
-      const quantityChanged = this.quantityId !== q.id;
       this.quantity = q;
       this.quantityId = q.id;
       this.fromId = newFrom;
       this.toId = newTo;
       if (!Number.isNaN(v) && p.get('v') !== null) this.value = v;
-      if (quantityChanged) this.chainSteps.set([]);
       this.recompute();
     });
   }
@@ -104,7 +100,6 @@ export class ConverterComponent implements OnInit, OnDestroy {
     this.quantityId = id;
     this.fromId = this.defaultFrom(q);
     this.toId = this.defaultTo(q, this.fromId);
-    this.chainSteps.set([]);
     this.recompute();
   }
 
@@ -314,25 +309,6 @@ export class ConverterComponent implements OnInit, OnDestroy {
       return `${to.symbol} = ${from.symbol} ${sign} ${absB}`;
     }
     return `${to.symbol} = (${from.symbol} × ${coeff(A)}) ${sign} ${absB}`;
-  }
-
-  chainValue(unitId: string): number {
-    if (!this.quantity) return NaN;
-    return this.service.convert(this.quantity, this.fromId, unitId, this.value);
-  }
-
-  addChainStep(): void {
-    const used = new Set([this.fromId, ...this.chainSteps()]);
-    const next = this.units().find((u) => !used.has(u.id));
-    if (next) this.chainSteps.update((s) => [...s, next.id]);
-  }
-
-  updateChainStep(i: number, unitId: string): void {
-    this.chainSteps.update((s) => s.map((id, idx) => (idx === i ? unitId : id)));
-  }
-
-  removeChainStep(i: number): void {
-    this.chainSteps.update((s) => s.filter((_, idx) => idx !== i));
   }
 
   label(id: SystemId): string {
