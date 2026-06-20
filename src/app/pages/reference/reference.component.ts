@@ -17,6 +17,7 @@ interface Row {
   quantityId: string;
   unitId: string;
   convertible: boolean;
+  wikipediaUrl: string | undefined;
 }
 interface Group {
   category: string;
@@ -125,6 +126,7 @@ export class ReferenceComponent {
           quantityId: q.id,
           unitId: u.id,
           convertible,
+          wikipediaUrl: u.wikipediaUrl,
         });
       }
     }

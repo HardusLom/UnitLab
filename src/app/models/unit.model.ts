@@ -26,6 +26,8 @@ export interface Unit {
    */
   factor: number;
   offset?: number;
+  /** Link to the Wikipedia article for this unit */
+  wikipediaUrl?: string;
 }
 
 export interface Quantity {
